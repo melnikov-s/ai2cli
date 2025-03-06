@@ -1,0 +1,47 @@
+{
+  "name": "ai2cli",
+  "version": "1.0.0",
+  "main": "src/index.js",
+  "type": "module",
+  "bin": {
+    "ai2cli": "./src/index.js"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix"
+  },
+  "keywords": [],
+  "author": "Sergey Melnikov",
+  "license": "MIT",
+  "description": "CLI utility to convert English text to shell commands using an LLM",
+  "dependencies": {
+    "@ai-sdk/anthropic": "^1.1.11",
+    "@ai-sdk/deepseek": "^0.1.12",
+    "@ai-sdk/google": "^1.1.17",
+    "@ai-sdk/groq": "^1.1.11",
+    "@ai-sdk/mistral": "^1.1.13",
+    "@ai-sdk/openai": "^1.1.14",
+    "@ai-sdk/xai": "^1.1.12",
+    "ai": "^4.1.46",
+    "chalk": "^5.4.1",
+    "cli-highlight": "^2.1.11",
+    "commander": "^13.1.0",
+    "enquirer": "^2.4.1",
+    "ollama-ai-provider": "^1.2.0",
+    "ora": "^8.2.0",
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "eslint": "^9.21.0"
+  },
+  "files": [
+    "src",
+    "README.md",
+    "LICENSE"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/melnikov-s/ai2cli.git"
+  }
+}

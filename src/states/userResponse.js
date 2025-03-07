@@ -47,20 +47,26 @@ function displayOptions(
   scriptMode,
   options = {}
 ) {
+  const { response, executionResults } = currentCommand;
+  const hasOutput = executionResults?.output;
+
   if (scriptMode) {
     // Setup command for decision making
     log.info("  • Press Enter to execute the script");
     log.info("  • Press 'c' to copy the script and exit");
-    log.info("  • Press 'r' to refine/modify the script");
+    log.info(
+      "  • Press 'r' to refine/modify the script" +
+        (hasOutput ? " (with the output)" : "")
+    );
   } else {
     // If destructive, show a warning
-    if (currentCommand?.destructive) {
+    if (response?.destructive) {
       log.warning("This command may modify or delete existing files.");
     }
 
     // Show caution message if present
-    if (currentCommand?.caution) {
-      log.warning("Caution: " + currentCommand.caution);
+    if (response?.caution) {
+      log.warning("Caution: " + response.caution);
     }
 
     // Setup readline interface
@@ -68,8 +74,11 @@ function displayOptions(
     log.info("  • Press Enter to execute the command");
     log.info("  • Press 'c' to copy the command and exit");
     log.info("  • Press 's' to convert this to a script instead");
-    log.info("  • Press 'r' to refine/modify the command");
-    if (currentCommand?.breakdown) {
+    log.info(
+      "  • Press 'r' to refine/modify the command" +
+        (hasOutput ? " (with the output)" : "")
+    );
+    if (response?.breakdown) {
       log.info("  • Press 'b' to see detailed command breakdown");
     }
   }
@@ -118,12 +127,17 @@ export async function handleUserResponse(context) {
     log.nl();
   }
 
-  displayOptions(
-    currentCommand.response,
-    hasMultipleModels,
-    scriptMode,
-    options
-  );
+  if (currentCommand.executionResults?.output) {
+    log.header("\nLast Output:");
+    log.nl();
+    if (currentCommand.executionResults?.error) {
+      log.error(currentCommand.executionResults.output ?? "<no output>");
+    } else if (currentCommand.executionResults?.output) {
+      log.text(currentCommand.executionResults.output);
+    }
+  }
+
+  displayOptions(currentCommand, hasMultipleModels, scriptMode, options);
 
   // Set up keypress handler for user interaction
   return new Promise((resolve) => {

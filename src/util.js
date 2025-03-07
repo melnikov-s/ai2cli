@@ -165,3 +165,16 @@ export async function getAvailableScripts(config) {
     return [];
   }
 }
+
+export function waitKeyPressed() {
+  return new Promise(resolve => {
+      const wasRaw = process.stdin.isRaw;
+      process.stdin.setRawMode(true);
+      process.stdin.resume();
+      process.stdin.once("data", (data) => {
+          process.stdin.pause();
+          process.stdin.setRawMode(wasRaw);
+          resolve(data.toString());
+      });
+  });
+}

@@ -32,7 +32,7 @@ function buildMessagesLLM(context) {
       : command.type === "refinement"
       ? getRefinementPrompt({
           request: command.request,
-          executionResults: command.executionResults,
+          executionResults: command.previousExecutionResults?.output,
         })
       : command.request;
   };

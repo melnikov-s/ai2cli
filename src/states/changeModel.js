@@ -22,7 +22,7 @@ export async function handleChangeModel(context) {
 
   // Group models by provider
   allModels.forEach((modelString) => {
-    const [provider, modelName] = modelString.split("/");
+    const [provider] = modelString.split("/");
     if (!providers[provider]) {
       providers[provider] = [];
     }
@@ -57,26 +57,27 @@ export async function handleChangeModel(context) {
     const selectedModel = await selectPrompt.run();
 
     if (selectedModel === context.model) {
-      log.warning("Already using this model.");
-      return context;
+      return { nextState: State.USER_RESPONSE, context };
     }
 
+    const newContext = { ...context };
     // Update the model in context
-    context.model = selectedModel;
+    newContext.model = selectedModel;
 
     // Add a model change flag to trigger regeneration
-    context.modelChanged = true;
+    newContext.modelChanged = true;
+    newContext.currentCommand.executionResults = null;
 
     // For command and script mode, we'll regenerate content with new model
     log.warning(`\nSwitching to model: ${selectedModel}`);
 
     // Always return to USER_REQUEST state with updated context for proper handling
-    return { nextState: State.USER_REQUEST, context };
+    return { nextState: State.USER_REQUEST, context: newContext };
   } catch (error) {
     // Handle Ctrl+C or other errors
     if (error.message !== "cancelled") {
       log.error(`Error: ${error.message}`);
     }
-    return { nextState: State.USER_RESPONSE, context };
+    return { nextState: State.EXIT, context };
   }
 }

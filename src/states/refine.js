@@ -8,6 +8,19 @@ const { Input } = enquirer;
 export async function handleRefine(context) {
   const { currentCommand, scriptMode } = context;
 
+  const hasOutput = currentCommand.executionResults?.output;
+
+  if (hasOutput) {
+    log.detail("Your last output will be used as context for refinement");
+    log.nl();
+    if (currentCommand.executionResults.error) {
+      log.error(currentCommand.executionResults.output);
+    } else {
+      log.text(currentCommand.executionResults.output);
+    }
+    log.nl();
+  }
+
   try {
     // Use Enquirer's Input prompt for refinement input
     const inputPrompt = new Input({
@@ -32,6 +45,7 @@ export async function handleRefine(context) {
 
     const newCurrentCommand = {
       request: refinementRequest,
+      previousExecutionResults: currentCommand.executionResults,
       type: "refinement",
     };
 

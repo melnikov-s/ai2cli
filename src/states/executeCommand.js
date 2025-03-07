@@ -4,7 +4,7 @@ import { spawn } from "child_process";
 import ora from "ora";
 import fs from "fs/promises";
 import path from "path";
-import { execAsync } from "../util.js";
+import { execAsync, waitKeyPressed } from "../util.js";
 import log from "../log.js";
 import enquirer from "enquirer";
 
@@ -55,11 +55,11 @@ export async function handleExecuteCommand(context) {
               }`
             );
             formSchema[param.name] = {
-              type: 'input',
-              message: `${param.name}${param.required ? ' (required)' : ''}`,
+              type: "input",
+              message: `${param.name}${param.required ? " (required)" : ""}`,
               hint: param.description,
               required: param.required,
-              initial: param.defaultValue || ''
+              initial: param.defaultValue || "",
             };
           });
 
@@ -213,40 +213,20 @@ export async function handleExecuteCommand(context) {
       } more characters]`;
   }
 
-  if (!executionOutput) {
-    log.detail("No output returned from command");
-  }
+  log.nl();
+  log.text("> Press any key to continue");
+  await waitKeyPressed();
 
   const newContext = { ...context };
+  newContext.currentCommand = {
+    ...context.currentCommand,
+    executionResults: {
+      output: executionOutput,
+      error: hasError,
+    },
+  };
 
-  try {
-    const prompt = new Input({
-      name: "refinement",
-      message: "Refine (or press Enter to exit):",
-      initial: hasError ? "fix the errors" : "",
-    });
-
-    const answer = await prompt.run();
-
-    if (answer.trim() === "") {
-      // User chose to exit
-      // print out the script path and how to execute it
-      log.detail(`Done! To execute the script manually, run: ${command}`);
-      log.nl();
-      return { nextState: State.EXIT, context };
-    } else {
-      // Store the refinement request and go to USER_REQUEST state
-      newContext.currentCommand = {
-        request: answer,
-        executionResults: executionOutput,
-        type: "refinement",
-      };
-      newContext.commandHistory.push(context.currentCommand);
-      return { nextState: State.USER_REQUEST, context: newContext };
-    }
-  } catch (err) {
-    return { nextState: State.EXECUTE_COMMAND, context };
-  }
+  return { nextState: State.USER_RESPONSE, context: newContext };
 }
 
 async function createAndSaveScript(
